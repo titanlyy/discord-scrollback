@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>#general | Test Server - Discord</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #111; }
+      #scroller {
+        height: 420px;
+        width: 640px;
+        overflow-y: auto;
+        box-sizing: border-box;
+      }
+      ol { list-style: none; margin: 0; padding: 0; position: relative; }
+      li { width: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="scroller">
+      <ol data-list-id="chat-messages" aria-label="Messages in general"></ol>
+    </div>
+    <script>
+      const TOTAL = 180;
+      const ROW = 52;
+      const BATCH = 24;
+      let loadedFrom = TOTAL - 36;
+      const scroller = document.getElementById("scroller");
+      const list = scroller.querySelector("ol");
+      let lock = false;
+
+      function render() {
+        const height = (TOTAL - loadedFrom) * ROW;
+        list.style.height = height + "px";
+        const viewTop = scroller.scrollTop;
+        const viewBottom = viewTop + scroller.clientHeight;
+        const first = Math.max(loadedFrom, loadedFrom + Math.floor(viewTop / ROW));
+        const last = Math.min(TOTAL - 1, loadedFrom + Math.floor((viewBottom - 1) / ROW));
+        const html = [];
+        html.push('<li id="chat-messages-not-a-message" style="position:absolute;width:0;height:0;overflow:hidden">skip me</li>');
+        for (let i = first; i <= last; i++) {
+          const id = 100000 + i;
+          const top = (i - loadedFrom) * ROW;
+          const stamped = new Date(Date.UTC(2020, 0, 1) + i * 60000).toISOString();
+          const grouped = i % 3 !== 0;
+          const header = grouped
+            ? ""
+            : `<h3><span class="username_x">User ${i % 5}</span><time datetime="${stamped}"></time></h3>`;
+          const time = grouped ? `<time datetime="${stamped}"></time>` : "";
+          const attachment =
+            i % 17 === 0
+              ? `<div id="message-accessories-${id}"><a href="https://cdn.discordapp.com/attachments/1/2/file-${i}.png">file</a></div>`
+              : "";
+          const emoji = i === 3 ? '<img class="emoji" alt=":wave:" src="https://cdn.discordapp.com/emojis/1.png" />' : "";
+          const reply =
+            i === 40
+              ? `<div id="message-reply-context-${id}" class="repliedMessage_x"><span class="username_x">User 0</span><span class="repliedText_x">earlier note</span></div>`
+              : "";
+          const embed =
+            i === 12
+              ? `<div id="message-accessories-${id}"><div class="embed_x"><div class="embedTitle_x">Embed title</div><div class="embedDescription_x">Embed body</div></div></div>`
+              : "";
+          html.push(
+            `<li id="chat-messages-999-${id}" style="position:absolute;top:${top}px;height:${ROW - 4}px"><div role="article">${reply}${header}${time}<div id="message-content-${id}">Message number ${i} hello ${emoji}</div>${attachment}${embed}</div></li>`
+          );
+        }
+        list.innerHTML = html.join("");
+      }
+
+      scroller.addEventListener("scroll", () => {
+        if (lock) return;
+        lock = true;
+        try {
+          if (scroller.scrollTop < 140 && loadedFrom > 0) {
+            const add = Math.min(BATCH, loadedFrom);
+            const before = (TOTAL - loadedFrom) * ROW;
+            loadedFrom -= add;
+            const delta = (TOTAL - loadedFrom) * ROW - before;
+            scroller.scrollTop += delta;
+          }
+          render();
+        } finally {
+          lock = false;
+        }
+      });
+
+      render();
+      scroller.scrollTop = scroller.scrollHeight;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scrollback</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div class="mark" aria-hidden="true"></div>
+      <div>
+        <h1>Scrollback</h1>
+        <p>Full Discord history, saved as text</p>
+      </div>
+    </header>
+
+    <section id="gate">
+      <p>Open a channel on discord.com, then click Scrollback again.</p>
+      <p class="fine">Stable, PTB, and Canary all work. The extension only reads the channel you already have open.</p>
+    </section>
+
+    <main id="app" hidden>
+      <p id="channel" class="channel"></p>
+      <label class="field" id="list-field" hidden>
+        <span>Which list</span>
+        <select id="list"></select>
+      </label>
+
+      <p id="status" class="status">Ready.</p>
+      <div class="stats">
+        <div>
+          <strong id="count">0</strong>
+          <span>messages</span>
+        </div>
+        <div>
+          <strong id="oldest">—</strong>
+          <span>oldest captured</span>
+        </div>
+        <div>
+          <strong id="fixes">0</strong>
+          <span>slowdowns</span>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend>Scroll throttle</legend>
+        <div class="presets" id="presets" role="group" aria-label="Speed presets">
+          <button type="button" data-preset="careful">Careful</button>
+          <button type="button" data-preset="slow">Slow</button>
+          <button type="button" data-preset="medium">Medium</button>
+          <button type="button" data-preset="fast">Fast</button>
+        </div>
+        <label class="slider">
+          <span>Step <output id="step-out"></output></span>
+          <input id="step" type="range" min="8" max="75" step="1" value="28" />
+        </label>
+        <p class="hint">How far up the screen moves each hop. Shorter hops overlap, so Discord cannot drop messages between paints.</p>
+        <label class="slider">
+          <span>Pause <output id="delay-out"></output></span>
+          <input id="delay" type="range" min="100" max="4000" step="50" value="900" />
+        </label>
+        <p class="hint" id="speed-hint"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Text file</legend>
+        <label class="check"><input id="compact" type="checkbox" /> One line per message</label>
+        <label class="check"><input id="attachments" type="checkbox" checked /> Attachment and sticker URLs</label>
+        <label class="check"><input id="embeds" type="checkbox" checked /> Embed titles and descriptions</label>
+        <label class="check"><input id="replies" type="checkbox" checked /> Reply quotes</label>
+        <label class="check"><input id="reactions" type="checkbox" /> Reactions</label>
+        <label class="check"><input id="autodownload" type="checkbox" checked /> Download when the scroll finishes</label>
+        <label class="limit">
+          <span>Stop after</span>
+          <input id="max" type="number" min="0" step="100" value="0" />
+          <span>messages</span>
+        </label>
+        <p class="hint">0 means the whole history. A limit keeps the newest messages, because scrolling starts at the bottom.</p>
+      </fieldset>
+
+      <div class="actions">
+        <button id="start" class="primary" type="button">Export full history</button>
+        <button id="from-here" type="button">From here upward</button>
+        <button id="pause" type="button" hidden>Pause</button>
+        <button id="resume" type="button" hidden>Resume</button>
+        <button id="stop" type="button" hidden>Stop</button>
+        <button id="download" type="button" hidden>Download .txt</button>
+        <button id="show-dock" type="button">Show on-page controls</button>
+      </div>
+      <p id="note" class="fine"></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
