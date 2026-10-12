@@ -155,6 +155,15 @@
         label { display: grid; grid-template-columns: 52px 1fr auto; gap: 6px; align-items: center; margin: 6px 0; color: #d9cbb8; font-size: 12px; }
         output { color: #f4efe6; font-variant-numeric: tabular-nums; }
         input[type="range"] { width: 100%; accent-color: #e08a3c; }
+        input[type="number"] {
+          width: 100%;
+          background: #2a231c;
+          color: inherit;
+          border: 1px solid #5c4a38;
+          border-radius: 8px;
+          padding: 3px 6px;
+          font: inherit;
+        }
         .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .row button, .warn {
           border: 1px solid #5c4a38;
@@ -178,6 +187,7 @@
         <p class="meta"></p>
         <label>Step <input class="step" type="range" min="8" max="75" step="1" /> <output class="step-out"></output></label>
         <label>Pause <input class="delay" type="range" min="100" max="4000" step="50" /> <output class="delay-out"></output></label>
+        <label title="How long to wait at the top before downloading">Hold <input class="end-hold" type="number" min="2" max="180" step="1" value="15" /> <output class="end-out">sec</output></label>
         <div class="row">
           <button type="button" data-act="pause">Pause</button>
           <button type="button" data-button="resume" data-act="resume" class="primary">Resume</button>
@@ -197,7 +207,9 @@
     const delay = shadow.querySelector(".delay");
     const stepOut = shadow.querySelector(".step-out");
     const delayOut = shadow.querySelector(".delay-out");
+    const endHold = shadow.querySelector(".end-hold");
     let draggingSlider = false;
+    let editingHold = false;
     let savedNote = "";
 
     const mount = () => {
@@ -231,6 +243,17 @@
         });
       });
     }
+    endHold.addEventListener("focus", () => {
+      editingHold = true;
+    });
+    endHold.addEventListener("blur", () => {
+      editingHold = false;
+    });
+    endHold.addEventListener("change", () => {
+      const seconds = Math.min(180, Math.max(2, Math.round(Number(endHold.value) || 15)));
+      endHold.value = String(seconds);
+      controller.updateSettings({ endHoldMs: seconds * 1000 });
+    });
     shadow.querySelector(".row").addEventListener("click", (event) => {
       const act = event.target?.dataset?.act;
       if (act === "pause") controller.pause();
@@ -288,6 +311,9 @@
           delay.value = String(state.settings.delayMs);
           stepOut.textContent = `${step.value}%`;
           delayOut.textContent = `${state.settings.delayMs}ms`;
+        }
+        if (!editingHold) {
+          endHold.value = String(Math.round((state.settings.endHoldMs || 15000) / 1000));
         }
         shadow.querySelector('[data-act="pause"]').hidden = state.phase !== "running";
         shadow.querySelector('[data-act="resume"]').hidden = state.phase !== "paused";

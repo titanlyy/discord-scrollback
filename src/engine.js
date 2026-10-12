@@ -25,6 +25,7 @@
     includeReactions: false,
     compact: false,
     maxMessages: 0,
+    endHoldMs: 15000,
     autoDownload: true,
   };
 
@@ -189,7 +190,7 @@
 
     async function loop(my) {
       let stuck = 0;
-      let stableTop = 0;
+      let endQuietMs = 0;
 
       while (alive(my)) {
         if (phase === "paused") {
@@ -220,15 +221,16 @@
         if (target.scroller.scrollTop <= 8) {
           stuck = 0;
           if (isLoading(target.scroller)) {
-            stableTop = 0;
+            endQuietMs = 0;
             statusMessage = "At the top, waiting for Discord to load older messages…";
             emit();
-            await sleep(Math.max(settings.delayMs, 250));
+            await sleep(500);
             continue;
           }
           const sizeBefore = messages.size;
           const heightBefore = target.scroller.scrollHeight;
-          await sleep(settings.delayMs);
+          const waitMs = 500;
+          await sleep(waitMs);
           if (!alive(my) || phase === "paused") continue;
           const again = resolve();
           if (!again) continue;
@@ -236,13 +238,9 @@
           const stillTop = again.scroller.scrollTop <= 8 && !isLoading(again.scroller);
           const grew = again.scroller.scrollHeight > heightBefore + 24;
           if (stillTop && !grew && messages.size === sizeBefore) {
-            stableTop += 1;
-            statusMessage =
-              stableTop < 3
-                ? "At the top. Confirming there is no older history…"
-                : "Still at the top…";
-            emit();
-            if (stableTop >= 4) {
+            endQuietMs += waitMs;
+            const remaining = settings.endHoldMs - endQuietMs;
+            if (remaining <= 0) {
               finish(
                 messages.size
                   ? `Reached the beginning. ${messages.size} messages captured.`
@@ -251,15 +249,17 @@
               );
               return;
             }
+            statusMessage = `At the top. Downloading in ${Math.ceil(remaining / 1000)}s unless older messages load…`;
+            emit();
           } else {
-            stableTop = 0;
+            endQuietMs = 0;
             statusMessage = `Loading history… ${messages.size} messages captured.`;
             emit();
           }
           continue;
         }
 
-        stableTop = 0;
+        endQuietMs = 0;
         const items = visibleItems(target.ol);
         if (!items.length) {
           stuck += 1;
@@ -472,6 +472,7 @@
       includeReactions: Boolean(input.includeReactions),
       compact: Boolean(input.compact),
       maxMessages: Math.max(0, Math.round(numberOr(input.maxMessages, 0))),
+      endHoldMs: Math.round(clamp(numberOr(input.endHoldMs, 15000), 2000, 180000)),
       autoDownload: input.autoDownload !== false,
     };
   }

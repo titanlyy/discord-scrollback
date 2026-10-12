@@ -38,6 +38,7 @@ try {
         includeReactions: false,
         compact: false,
         maxMessages: 0,
+        endHoldMs: 1500,
         autoDownload: false,
       },
     });

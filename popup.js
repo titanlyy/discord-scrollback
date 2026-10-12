@@ -29,6 +29,7 @@ const fields = {
   reactions: document.querySelector("#reactions"),
   autodownload: document.querySelector("#autodownload"),
   max: document.querySelector("#max"),
+  endHold: document.querySelector("#end-hold"),
 };
 
 let tabId = null;
@@ -160,6 +161,7 @@ function fillSettings(settings) {
   fields.reactions.checked = settings.includeReactions;
   fields.autodownload.checked = settings.autoDownload;
   fields.max.value = String(settings.maxMessages || 0);
+  fields.endHold.value = String(Math.round((settings.endHoldMs || 15000) / 1000));
   setPresetPressed(settings.preset);
   paintSpeed();
 }
@@ -203,6 +205,7 @@ function currentSettings() {
     includeReactions: fields.reactions.checked,
     autoDownload: fields.autodownload.checked,
     maxMessages: Number(fields.max.value) || 0,
+    endHoldMs: Math.round(Math.min(180, Math.max(2, Number(fields.endHold.value) || 15)) * 1000),
   };
 }
 

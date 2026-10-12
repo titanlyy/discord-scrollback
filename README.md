@@ -33,6 +33,7 @@ Switching channels mid-export stops the scroll so two channels are not mixed int
 | --- | --- |
 | Step | Fraction of the visible message list moved on each hop. Shorter steps overlap more, which is what keeps virtualized messages from being skipped. |
 | Pause | How long to wait after each hop so Discord can fetch and paint older history. |
+| Confirm the end | Seconds to keep waiting after the scroller reaches the top before the text file downloads. The timer resets if older messages load. Raise it on a slow connection so a late page of history is not mistaken for the beginning. |
 | Presets | Careful, Slow, Medium, and Fast set both controls together. Moving a slider switches you to a custom speed. |
 | Stop after | `0` means the whole channel. Any other number keeps the newest messages, because the walk starts at the bottom. |
 

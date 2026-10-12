@@ -72,6 +72,12 @@
         <label class="check"><input id="reactions" type="checkbox" /> Reactions</label>
         <label class="check"><input id="autodownload" type="checkbox" checked /> Download when the scroll finishes</label>
         <label class="limit">
+          <span>Confirm the end for</span>
+          <input id="end-hold" type="number" min="2" max="180" step="1" value="15" />
+          <span>seconds</span>
+        </label>
+        <p class="hint">Once the scroller hits the top, Scrollback keeps waiting this long before it downloads. If older messages show up, the timer starts over. Raise it when the channel is slow to load.</p>
+        <label class="limit">
           <span>Stop after</span>
           <input id="max" type="number" min="0" step="100" value="0" />
           <span>messages</span>
